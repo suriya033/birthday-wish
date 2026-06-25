@@ -1,231 +1,226 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import StarField from './StarField';
 
-const CORRECT_DATE = '25/06/2026';
+export default function Stage2({ onOpen }) {
+  const [state, setState] = useState('idle'); // idle | opening | opened
 
-export default function Stage2({ onSuccess }) {
-  const [date, setDate] = useState('');
-  const [status, setStatus] = useState('idle');
-  const [shaking, setShaking] = useState(false);
-  const containerRef = useRef(null);
-
-  const handleInput = (e) => {
-    let val = e.target.value.replace(/\D/g, '');
-    if (val.length > 8) val = val.slice(0, 8);
-    let formatted = '';
-    if (val.length > 0) formatted = val.slice(0, 2);
-    if (val.length > 2) formatted += '/' + val.slice(2, 4);
-    if (val.length > 4) formatted += '/' + val.slice(4, 8);
-    setDate(formatted);
-    setStatus('idle');
-  };
-
-  const verify = () => {
-    if (!date) return;
-    setStatus('verifying');
+  const handleClick = () => {
+    if (state !== 'idle') return;
+    setState('opening');
     setTimeout(() => {
-      if (date === CORRECT_DATE) {
-        setStatus('success');
-        setTimeout(() => onSuccess(), 2200);
-      } else {
-        setStatus('error');
-        setShaking(true);
-        setTimeout(() => {
-          setShaking(false);
-          setStatus('idle');
-        }, 600);
-      }
+      setState('opened');
+      setTimeout(() => {
+        onOpen();
+      }, 1200);
     }, 1500);
   };
 
   return (
-    <div
-      ref={containerRef}
+    <motion.div
+      key="stage2"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.3 }}
+      transition={{ duration: 0.8 }}
       className="min-h-screen w-full flex items-center justify-center relative overflow-hidden"
-      style={{ background: '#050505' }}
+      style={{ background: 'linear-gradient(135deg, #8b0000 0%, #c0392b 50%, #8b0000 100%)' }}
     >
-      <StarField />
-
-      {/* Grid */}
-      <div
+      {/* Subtle radial glow */}
+      <motion.div
+        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,215,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,215,0,0.03) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px',
-          zIndex: 1,
-        }}
+        style={{ background: 'radial-gradient(circle at center, rgba(255,200,100,0.15) 0%, transparent 70%)' }}
       />
 
-      {/* Rotating outer rings */}
-      {[300, 420, 540].map((size, i) => (
-        <div
+      {/* Floating particles */}
+      {[...Array(16)].map((_, i) => (
+        <motion.div
           key={i}
           className="absolute rounded-full pointer-events-none"
           style={{
-            width: size,
-            height: size,
-            top: '50%',
-            left: '50%',
-            marginTop: -size / 2,
-            marginLeft: -size / 2,
-            border: `1px dashed rgba(255,215,0,${0.15 - i * 0.03})`,
-            animation: `${i % 2 === 0 ? 'rotateRing' : 'rotateRingReverse'} ${8 + i * 3}s linear infinite`,
-            zIndex: 1,
+            width: Math.random() * 6 + 2,
+            height: Math.random() * 6 + 2,
+            background: `rgba(255,${150 + Math.floor(Math.random() * 100)},0,${0.3 + Math.random() * 0.5})`,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
           }}
+          animate={{ y: [-20, 20, -20], opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 3 + Math.random() * 3, repeat: Infinity, delay: Math.random() * 3 }}
         />
       ))}
 
+      {/* The Card */}
       <motion.div
-        initial={{ opacity: 0, x: 100 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
-        className={`relative z-10 glass-panel-strong p-10 md:p-14 w-full max-w-md mx-6 text-center ${shaking ? 'shake' : ''}`}
-        style={{ boxShadow: '0 0 80px rgba(255,215,0,0.1), 0 0 160px rgba(255,215,0,0.05)' }}
+        initial={{ y: 80, opacity: 0, scale: 0.85 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ duration: 1.2, type: 'spring', bounce: 0.4 }}
+        className="relative"
+        style={{ width: 380, maxWidth: '92vw' }}
       >
-        {/* Security icon */}
+        {/* White card background */}
         <motion.div
-          className="text-5xl mb-6"
-          animate={{ rotate: [0, 5, -5, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          animate={state === 'opened' ? { scale: 1.08, opacity: 0 } : {}}
+          transition={{ duration: 0.8 }}
+          className="rounded-2xl shadow-2xl p-8 pb-10 flex flex-col items-center gap-6"
+          style={{ background: '#fffef7', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1)' }}
         >
-          🛡️
-        </motion.div>
+          {/* Birthday Text */}
+          <div className="text-center mt-2">
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 1 }}
+              className="text-3xl md:text-4xl font-bold"
+              style={{ fontFamily: "'Caveat', cursive", color: '#9b2335', letterSpacing: '0.02em' }}
+            >
+              Happy Birthday!
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 1 }}
+              className="text-2xl md:text-3xl font-semibold mt-1"
+              style={{ fontFamily: "'Caveat', cursive", color: '#9b2335' }}
+            >
+              Prakash Sankar
+            </motion.p>
+          </div>
 
-        {/* Step indicator */}
-        <div className="flex justify-center gap-2 mb-6">
-          {[1, 2, 3].map(n => (
+          {/* Envelope */}
+          <motion.div
+            onClick={handleClick}
+            whileHover={state === 'idle' ? { scale: 1.06, y: -4 } : {}}
+            whileTap={state === 'idle' ? { scale: 0.97 } : {}}
+            className="relative cursor-pointer select-none"
+            style={{ width: 200, height: 140 }}
+            title="Click to open"
+          >
+            {/* Envelope body */}
             <div
-              key={n}
-              className="w-8 h-1 rounded-full"
+              className="absolute inset-0 rounded-lg shadow-xl"
+              style={{ background: '#c0392b' }}
+            />
+
+            {/* Envelope bottom fold triangle */}
+            <div
+              className="absolute bottom-0 left-0 right-0"
               style={{
-                background: n === 1 ? 'rgba(0,255,136,0.8)' : n === 2 ? 'rgba(255,215,0,0.8)' : 'rgba(255,255,255,0.1)',
+                height: 0,
+                borderLeft: '100px solid transparent',
+                borderRight: '100px solid transparent',
+                borderBottom: '65px solid #a93226',
               }}
             />
-          ))}
-        </div>
 
-        <div className="font-orbitron text-xs tracking-widest mb-1" style={{ color: 'rgba(255,215,0,0.4)' }}>
-          STEP 2 OF 3
-        </div>
-        <h2 className="font-orbitron text-xl md:text-2xl font-black gold-text mb-2">
-          SECONDARY SECURITY CHECK
-        </h2>
-        <div className="font-rajdhani text-sm tracking-widest text-gray-500 mb-8">
-          Temporal Verification Protocol
-        </div>
+            {/* Envelope left side */}
+            <div
+              className="absolute top-0 left-0 bottom-0"
+              style={{
+                width: 0,
+                borderTop: '70px solid transparent',
+                borderBottom: '70px solid transparent',
+                borderLeft: '100px solid #b03a2e',
+              }}
+            />
 
-        <div className="w-full h-px mb-8" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,215,0,0.4), transparent)' }} />
+            {/* Envelope right side */}
+            <div
+              className="absolute top-0 right-0 bottom-0"
+              style={{
+                width: 0,
+                borderTop: '70px solid transparent',
+                borderBottom: '70px solid transparent',
+                borderRight: '100px solid #b03a2e',
+              }}
+            />
 
-        <div className="mb-6">
-          <label className="block font-orbitron text-xs tracking-widest mb-3" style={{ color: 'rgba(255,215,0,0.6)' }}>
-            ENTER CURRENT DATE
-          </label>
-          <div className="font-rajdhani text-xs text-gray-600 mb-3 tracking-widest">
-            E.G.  25/06/2026
-          </div>
-          <input
-            type="text"
-            className="secure-input"
-            placeholder="DD/MM/YYYY"
-            value={date}
-            onChange={handleInput}
-            onKeyDown={(e) => e.key === 'Enter' && verify()}
-            maxLength={10}
-            disabled={status === 'verifying' || status === 'success'}
-          />
-        </div>
-
-        <AnimatePresence mode="wait">
-          {status === 'verifying' && (
-            <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-4">
-              {/* Progress rings animation */}
-              <div className="flex justify-center mb-3">
-                <div className="relative w-16 h-16">
-                  {[1, 2, 3].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        border: `2px solid rgba(255,215,0,${0.6 - i * 0.15})`,
-                        animation: `rotateRing ${1 + i * 0.5}s linear infinite`,
-                        transform: `scale(${1 - i * 0.2})`,
-                      }}
-                    />
-                  ))}
-                  <div className="absolute inset-0 flex items-center justify-center font-orbitron text-xs" style={{ color: '#FFD700' }}>
-                    ⟳
-                  </div>
-                </div>
-              </div>
-              <div className="font-orbitron text-xs tracking-widest mb-2" style={{ color: 'rgba(255,215,0,0.6)' }}>
-                VERIFYING TEMPORAL DATA...
-              </div>
-              <div className="w-full bg-gray-800 rounded-full h-1 overflow-hidden">
-                <motion.div
-                  className="h-full rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #FFD700, #FFF0A0)' }}
-                  initial={{ width: '0%' }}
-                  animate={{ width: '100%' }}
-                  transition={{ duration: 1.5 }}
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {status === 'success' && (
+            {/* Envelope flap (top) */}
             <motion.div
-              key="s"
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: 'spring', stiffness: 200 }}
-              className="mb-4"
+              animate={state === 'opening' || state === 'opened' ? { rotateX: -180, y: -10 } : { rotateX: 0 }}
+              transition={{ duration: 1.0, ease: 'easeInOut' }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 0,
+                borderLeft: '100px solid transparent',
+                borderRight: '100px solid transparent',
+                borderTop: '70px solid #a93226',
+                transformOrigin: 'top center',
+                zIndex: 10,
+              }}
+            />
+
+            {/* Gold seal button */}
+            <motion.div
+              className="absolute z-20 flex items-center justify-center rounded-full shadow-lg"
+              style={{
+                width: 44,
+                height: 44,
+                background: 'radial-gradient(circle at 35% 35%, #ffe066, #c8a400)',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                border: '2px solid #a07800',
+                boxShadow: '0 4px 16px rgba(180,130,0,0.5), inset 0 1px 2px rgba(255,255,200,0.5)',
+              }}
+              animate={state === 'idle' ? { scale: [1, 1.08, 1] } : { scale: 0, opacity: 0 }}
+              transition={state === 'idle' ? { duration: 2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
             >
-              <motion.div
-                className="text-4xl mb-2"
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 0.5 }}
-              >
-                ✓
-              </motion.div>
-              <div className="font-orbitron text-sm tracking-widest" style={{ color: '#00FF88' }}>
-                DATE CONFIRMED ✓
-              </div>
-              <motion.div
-                className="text-xs mt-2 font-orbitron"
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-                style={{ color: 'rgba(0,255,136,0.6)' }}
-              >
-                TEMPORAL LOCK RELEASED
-              </motion.div>
+              <span style={{ fontSize: 18, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}>✦</span>
             </motion.div>
-          )}
 
-          {status === 'error' && (
-            <motion.div key="e" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-4">
-              <div className="font-orbitron text-sm text-red-500 tracking-widest">✕ TEMPORAL MISMATCH</div>
-              <div className="font-rajdhani text-sm text-red-400 mt-1">INVALID DATE DETECTED</div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {/* "Click to open" hint */}
+            <AnimatePresence>
+              {state === 'idle' && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute -bottom-8 left-0 right-0 text-center text-xs uppercase tracking-widest"
+                  style={{ color: 'rgba(155,35,53,0.6)', fontFamily: "'Rajdhani', sans-serif" }}
+                >
+                  Click to open
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
-        {status !== 'success' && (
-          <motion.button
-            className="secure-btn w-full"
-            onClick={verify}
-            disabled={status === 'verifying'}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          {/* Bottom decorative line */}
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: '70%' }}
+            transition={{ delay: 1.2, duration: 1.5 }}
+            className="h-px"
+            style={{ background: 'linear-gradient(90deg, transparent, #c0392b66, transparent)', marginTop: 16 }}
+          />
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.6, duration: 1 }}
+            className="text-xs uppercase tracking-widest"
+            style={{ color: 'rgba(100,20,30,0.4)', fontFamily: "'Rajdhani', sans-serif" }}
           >
-            {status === 'verifying' ? 'PROCESSING...' : 'CONTINUE'}
-          </motion.button>
-        )}
-
-        <div className="mt-8 font-orbitron text-xs" style={{ color: 'rgba(255,215,0,0.2)' }}>
-          TEMPORAL AUTH PROTOCOL v2.6 ■ SECURE
-        </div>
+            A special surprise awaits inside
+          </motion.p>
+        </motion.div>
       </motion.div>
-    </div>
+
+      {/* Flash on open */}
+      <AnimatePresence>
+        {state === 'opened' && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.7, 0] }}
+            transition={{ duration: 1, times: [0, 0.3, 1] }}
+            style={{ background: 'radial-gradient(circle at center, #fffde0 0%, #fff 50%, transparent 100%)' }}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

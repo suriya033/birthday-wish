@@ -1,253 +1,309 @@
-import { useEffect, useState, useRef } from 'react';
-import { motion, useAnimation, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import gsap from 'gsap';
 import StarField from './StarField';
+import { useRef } from 'react';
 
-const IMAGES = [
-  'https://images.unsplash.com/photo-1530103862676-de3c9de59f9e?q=80&w=500&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1464349095431-e9a21285b5fb?q=80&w=500&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1558636508-e0db3814bd1d?q=80&w=500&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?q=80&w=500&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=500&auto=format&fit=crop',
+// Birthday wish pills — shown along the TOP and BOTTOM edges only
+const TOP_WISHES = [
+  { text: '🎉 Happy Birthday!', color: '#FFD700', delay: 1.0 },
+  { text: '✨ Have a great day!', color: '#ff6b9d', delay: 1.4 },
+  { text: '🌟 You are amazing!', color: '#00e5ff', delay: 1.8 },
+  { text: '🚀 Dream big!', color: '#b2ff59', delay: 2.2 },
 ];
+const BOTTOM_WISHES = [
+  { text: '🏆 You deserve the best!', color: '#FFD700', delay: 1.2 },
+  { text: '⭐ Shine bright!', color: '#ff6b9d', delay: 1.6 },
+  { text: '🌈 Joy & happiness!', color: '#00e5ff', delay: 2.0 },
+  { text: '🌸 Life is beautiful!', color: '#b2ff59', delay: 2.4 },
+];
+
+const RandomTextReveal = ({ text, className, delayOffset = 0, style }) => (
+  <div className={`flex flex-wrap justify-center gap-x-4 md:gap-x-6 ${className}`} style={style}>
+    {text.split(' ').map((word, wIdx) => (
+      <div key={wIdx} className="flex">
+        {word.split('').map((char, cIdx) => {
+          const initY = (wIdx + cIdx) % 2 === 0 ? 60 : -60;
+          const initX = ((wIdx * 3 + cIdx) % 7 - 3) * 20;
+          const initR = ((wIdx + cIdx) % 5 - 2) * 25;
+          return (
+            <motion.span
+              key={cIdx}
+              initial={{ opacity: 0, y: initY, x: initX, rotate: initR, scale: 0 }}
+              animate={{ opacity: 1, y: 0, x: 0, rotate: 0, scale: 1 }}
+              transition={{
+                duration: 1.2,
+                delay: delayOffset + (wIdx * 0.15 + cIdx * 0.05),
+                type: 'spring',
+                bounce: 0.45,
+              }}
+              className="inline-block"
+            >
+              {char}
+            </motion.span>
+          );
+        })}
+      </div>
+    ))}
+  </div>
+);
 
 export default function Stage3() {
   const [showContent, setShowContent] = useState(false);
+  const [count, setCount] = useState(3);
+  const [isCounting, setIsCounting] = useState(true);
   const containerRef = useRef(null);
 
   useEffect(() => {
-    // Reality Shift Sequence
-    const tl = gsap.timeline();
-    
-    tl.to(containerRef.current, {
-      duration: 1.5,
-      background: 'radial-gradient(circle at center, #2e080b 0%, #050505 100%)',
-      ease: 'power2.inOut',
-    })
-    .to('.flash-overlay', {
-      duration: 0.5,
-      opacity: 1,
-      background: '#fff',
-      ease: 'power4.in',
-    })
-    .to('.flash-overlay', {
-      duration: 1.8,
-      opacity: 0,
-      ease: 'power4.out',
-      onStart: () => {
-        setShowContent(true);
-        triggerConfettiSequence();
-      }
-    });
+    if (count > 0) {
+      const timer = setTimeout(() => setCount(c => c - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (count === 0 && isCounting) {
+      const timer = setTimeout(() => {
+        setIsCounting(false);
+        const tl = gsap.timeline();
+        tl.to(containerRef.current, {
+          duration: 1.5,
+          backgroundColor: '#000',
+          background: 'none',
+          ease: 'power2.inOut',
+        })
+          .to('.flash-overlay', { duration: 0.4, opacity: 1, background: '#fff', ease: 'power4.in' })
+          .to('.flash-overlay', {
+            duration: 1.6, opacity: 0, ease: 'power4.out',
+            onStart: () => { setShowContent(true); triggerConfetti(); },
+          });
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [count, isCounting]);
 
-  }, []);
-
-  const triggerConfettiSequence = () => {
-    const duration = 15 * 1000;
-    const end = Date.now() + duration;
-
+  const triggerConfetti = () => {
+    const colors = ['#FFD700', '#ff003c', '#00FF88', '#00BFFF', '#ff6b9d'];
+    confetti({ particleCount: 100, angle: 60, spread: 80, origin: { x: 0, y: 0.6 }, colors });
+    confetti({ particleCount: 100, angle: 120, spread: 80, origin: { x: 1, y: 0.6 }, colors });
+    const end = Date.now() + 14000;
     const frame = () => {
-      const colors = ['#FFD700', '#ff003c', '#00FF88', '#00BFFF', '#FFF'];
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 120,
-        origin: { x: 0 },
-        colors: colors,
-      });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 120,
-        origin: { x: 1 },
-        colors: colors,
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
+      confetti({ particleCount: 3, angle: 60, spread: 90, origin: { x: 0 }, colors });
+      confetti({ particleCount: 3, angle: 120, spread: 90, origin: { x: 1 }, colors });
+      if (Date.now() < end) requestAnimationFrame(frame);
     };
     frame();
   };
 
-  const imagePositions = [
-    { left: '5%', top: '10%', rotate: -15, delay: 1.5 },
-    { right: '5%', top: '15%', rotate: 10, delay: 1.7 },
-    { left: '10%', bottom: '15%', rotate: 20, delay: 1.9 },
-    { right: '12%', bottom: '10%', rotate: -25, delay: 2.1 },
-    { left: '25%', top: '3%', rotate: -5, delay: 2.3 },
-    { right: '28%', top: '5%', rotate: 15, delay: 2.5 },
-  ];
-
   return (
-    <div ref={containerRef} className="min-h-screen w-full relative overflow-hidden bg-black flex items-center justify-center perspective-1000">
+    <div
+      ref={containerRef}
+      className="min-h-screen w-full relative overflow-hidden bg-black flex flex-col items-center justify-center"
+    >
       <StarField />
-      
-      <div className="flash-overlay absolute inset-0 pointer-events-none opacity-0 z-50"></div>
-      
-      {/* Floating Birthday Images */}
-      {showContent && IMAGES.map((src, idx) => {
-        const pos = imagePositions[idx];
-        return (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, scale: 0, y: 100, rotate: pos.rotate - 45 }}
-            animate={{ opacity: 0.8, scale: 1, y: 0, rotate: pos.rotate }}
-            whileHover={{ scale: 1.2, opacity: 1, zIndex: 50, rotate: 0 }}
-            transition={{ 
-              duration: 1.5, 
-              delay: pos.delay, 
-              type: "spring", 
-              bounce: 0.6 
-            }}
-            className="absolute shadow-2xl rounded-sm bg-white p-2 pb-8 cursor-pointer"
-            style={{ 
-              left: pos.left, 
-              right: pos.right, 
-              top: pos.top, 
-              bottom: pos.bottom,
-              width: '180px',
-              height: '200px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-              transformStyle: 'preserve-3d'
-            }}
-          >
-            <div className="w-full h-full overflow-hidden absolute inset-x-0 top-0 p-2 bottom-8">
-              <img src={src} className="w-full h-full object-cover filter brightness-90 hover:brightness-110 transition-all" alt="memory" />
-            </div>
-            {/* Ribbon Pin */}
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 bg-red-600 rounded-full shadow-md z-10 block" />
-          </motion.div>
-        );
-      })}
+      <div className="flash-overlay absolute inset-0 pointer-events-none opacity-0 z-50" />
 
-      {showContent && (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.5, rotateX: 45 }}
-          animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-          transition={{ duration: 2, ease: "easeOut", type: "spring", bounce: 0.5 }}
-          className="relative z-10 glass-panel-strong p-10 md:p-16 w-full max-w-4xl mx-6 text-center transform-gpu"
-          style={{ boxShadow: '0 0 100px rgba(255,50,50,0.15), 0 0 200px rgba(255,215,0,0.1)' }}
-        >
-          {/* Sparkles / Light flares */}
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute -top-32 -left-32 w-64 h-64 bg-yellow-500/10 rounded-full blur-[100px] pointer-events-none"
-          />
-          <motion.div 
-            animate={{ rotate: -360 }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            className="absolute -bottom-32 -right-32 w-64 h-64 bg-red-500/10 rounded-full blur-[100px] pointer-events-none"
-          />
-
-          <motion.h2 
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1, duration: 1 }}
-            className="font-orbitron tracking-[0.4em] text-sm md:text-md text-[#FFD700] mb-4"
-          >
-            THE MOMENT HAS ARRIVED
-          </motion.h2>
-
-          <motion.h1 
-            className="font-orbitron text-5xl md:text-8xl font-black mb-6 holographic-text relative inline-block"
-            initial={{ scale: 0.8, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 100, delay: 1.2 }}
-            style={{ textShadow: "0px 10px 20px rgba(0,0,0,0.5)" }}
-          >
-            HAPPY BIRTHDAY
-          </motion.h1>
-
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 2.2, type: "spring", bounce: 0.7 }}
-            className="font-rajdhani text-5xl md:text-8xl font-bold mb-10 birthday-glow"
-            style={{ color: '#FFF' }}
-          >
-            PRAKASH SANKARI
-          </motion.div>
-
-          {/* Floating elements */}
-          <div className="flex justify-center gap-6 md:gap-12 mb-10">
-            {['🎂', '🎈', '🎉', '🌟', '🎁'].map((emoji, i) => (
-              <motion.div
-                key={i}
-                className="text-4xl md:text-6xl drop-shadow-2xl cursor-pointer"
-                whileHover={{ scale: 1.5, rotate: 15 }}
-                animate={{ 
-                  y: [-15, 15, -15], 
-                  rotate: [-5, 5, -5],
-                  scale: [1, 1.1, 1] 
-                }}
-                transition={{ 
-                  duration: 2.5 + i * 0.2, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-              >
-                {emoji}
-              </motion.div>
-            ))}
-          </div>
-
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 3, duration: 1.5 }}
-            className="font-rajdhani text-lg md:text-2xl text-gray-200 max-w-3xl mx-auto tracking-wide leading-relaxed bg-black/30 p-6 rounded-2xl border border-white/10"
-          >
-            Welcome to your personalized reality construct. Wishing you a phenomenal year packed with innovation, success, and out-of-this-world joy. The universe is yours.
-          </motion.p>
-          
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: "100%" }}
-            transition={{ duration: 1.5, delay: 3.5 }}
-            className="h-[2px] mx-auto mt-12"
-            style={{ background: 'linear-gradient(90deg, transparent, #FFD700, #ff003c, #FFD700, transparent)' }}
-          />
-
-        </motion.div>
-      )}
-
-      {/* Decorative Fireworks / Stars */}
+      {/* ── Countdown ── */}
       <AnimatePresence>
-         {showContent && (
-           <motion.div
-             initial={{ opacity: 0 }}
-             animate={{ opacity: 1 }}
-             transition={{ duration: 2, delay: 4 }}
-             className="absolute inset-0 pointer-events-none"
-           >
-              {[...Array(20)].map((_, i) => (
-                 <motion.div
-                   key={i}
-                   className="absolute w-1 h-1 bg-white rounded-full"
-                   style={{
-                     left: `${Math.random() * 100}%`,
-                     top: `${Math.random() * 100}%`,
-                     boxShadow: '0 0 10px #fff'
-                   }}
-                   animate={{
-                     scale: [0, 1, 0],
-                     opacity: [0, 1, 0]
-                   }}
-                   transition={{
-                     duration: 1.5 + Math.random() * 2,
-                     repeat: Infinity,
-                     delay: Math.random() * 5
-                   }}
-                 />
-              ))}
-           </motion.div>
-         )}
+        {isCounting && (
+          <motion.div
+            key="cd"
+            className="absolute inset-0 flex flex-col items-center justify-center z-[100] bg-black/90 backdrop-blur-md"
+            exit={{ opacity: 0, scale: 1.5 }}
+            transition={{ duration: 1, ease: 'easeIn' }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={count}
+                initial={{ opacity: 0, scale: 0.2, rotate: -20 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                exit={{ opacity: 0, scale: 2.2, filter: 'blur(12px)' }}
+                transition={{ duration: 0.65, type: 'spring', bounce: 0.5 }}
+                className="font-orbitron font-black text-[#FFD700] text-[12rem] md:text-[20rem] drop-shadow-[0_0_60px_rgba(255,215,0,0.9)] leading-none"
+              >
+                {count > 0 ? count : '🎂'}
+              </motion.div>
+            </AnimatePresence>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-8 font-rajdhani text-xl md:text-3xl text-gray-300 uppercase tracking-[0.5em] text-center"
+            >
+              INITIALIZING BIRTHDAY PROTOCOL
+              <span className="flex justify-center gap-2 mt-4">
+                {[1, 2, 3].map(i => (
+                  <motion.span
+                    key={i}
+                    animate={{ opacity: [0.2, 1, 0.2] }}
+                    transition={{ duration: 1.5, delay: i * 0.3, repeat: Infinity }}
+                    className="w-2 h-2 inline-block rounded-full bg-[#FFD700]"
+                  />
+                ))}
+              </span>
+            </motion.p>
+          </motion.div>
+        )}
       </AnimatePresence>
 
+      {showContent && (
+        <>
+          {/* ── LEFT Popper ── */}
+          <motion.div
+            initial={{ x: -300, y: 100, opacity: 0, rotate: -80, scale: 0.3 }}
+            animate={{ x: 0, y: 0, opacity: 1, rotate: 25, scale: 1 }}
+            transition={{ duration: 1.3, delay: 0.3, type: 'spring', bounce: 0.5 }}
+            className="absolute left-2 md:left-6 top-[38%] text-[6rem] md:text-[9rem] pointer-events-none z-20 drop-shadow-[0_0_20px_rgba(255,215,0,0.5)]"
+          >
+            🎉
+          </motion.div>
+
+          {/* ── RIGHT Popper ── */}
+          <motion.div
+            initial={{ x: 300, y: 100, opacity: 0, rotate: 80, scale: 0.3 }}
+            animate={{ x: 0, y: 0, opacity: 1, rotate: -25, scale: 1 }}
+            transition={{ duration: 1.3, delay: 0.5, type: 'spring', bounce: 0.5 }}
+            className="absolute right-2 md:right-6 top-[38%] text-[6rem] md:text-[9rem] pointer-events-none z-20 drop-shadow-[0_0_20px_rgba(255,100,180,0.5)]"
+            style={{ transform: 'scaleX(-1)' }}
+          >
+            🎊
+          </motion.div>
+
+          {/* ── TOP Wish Row ── */}
+          <motion.div
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.8 }}
+            className="absolute top-4 inset-x-0 flex justify-center flex-wrap gap-3 px-4 pointer-events-none z-10"
+          >
+            {TOP_WISHES.map((w, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, scale: 0.5, y: -20 }}
+                animate={{ opacity: 1, scale: 1, y: 0, rotate: [0, 2, -2, 0] }}
+                transition={{ duration: 0.8, delay: w.delay, type: 'spring' }}
+                className="px-3 py-1 rounded-full text-xs md:text-sm font-rajdhani font-bold uppercase tracking-widest"
+                style={{
+                  color: w.color,
+                  background: `${w.color}18`,
+                  border: `1px solid ${w.color}55`,
+                  boxShadow: `0 0 10px ${w.color}33`,
+                  textShadow: `0 0 8px ${w.color}`,
+                  backdropFilter: 'blur(6px)',
+                }}
+              >
+                {w.text}
+              </motion.span>
+            ))}
+          </motion.div>
+
+          {/* ── MAIN CENTER CONTENT ── */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, delay: 0.4, type: 'spring', bounce: 0.3 }}
+            className="relative z-30 w-full max-w-3xl mx-auto text-center px-6 py-8 md:py-12"
+            style={{
+              background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.75) 40%, transparent 100%)',
+            }}
+          >
+            {/* Glowing ring behind */}
+            <motion.div
+              animate={{ scale: [1, 1.06, 1], opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute inset-0 -z-10 rounded-3xl pointer-events-none"
+              style={{ boxShadow: '0 0 120px 20px rgba(255,215,0,0.12), 0 0 60px 10px rgba(255,60,60,0.08)' }}
+            />
+
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.5, duration: 1 }}
+              className="font-orbitron tracking-[0.4em] text-xs md:text-sm text-[#FFD700] mb-6"
+            >
+              ✦ THE MOMENT HAS ARRIVED ✦
+            </motion.p>
+
+            <RandomTextReveal
+              text="HAPPY BIRTHDAY"
+              className="font-orbitron font-black text-5xl md:text-7xl lg:text-8xl mb-4 holographic-text"
+              style={{ textShadow: '0 4px 24px rgba(255,215,0,0.4)' }}
+              delayOffset={0.6}
+            />
+
+            <RandomTextReveal
+              text="PRAKASH SANKAR"
+              className="font-rajdhani font-bold text-4xl md:text-6xl lg:text-7xl mb-6 birthday-glow"
+              style={{ color: '#fff', textShadow: '0 0 30px rgba(255,255,255,0.35)' }}
+              delayOffset={2.0}
+            />
+
+            {/* Divider */}
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: '80%' }}
+              transition={{ duration: 1.8, delay: 3.5 }}
+              className="h-[2px] mx-auto mb-6"
+              style={{ background: 'linear-gradient(90deg, transparent, #FFD700, #ff003c, #FFD700, transparent)' }}
+            />
+
+            {/* Floating emoji row */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 4, duration: 1 }}
+              className="flex justify-center gap-4 md:gap-8 text-3xl md:text-5xl"
+            >
+              {['🎂', '🎈', '🎁', '🌟', '🎊'].map((emoji, i) => (
+                <motion.span
+                  key={i}
+                  animate={{ y: [-8, 8, -8], rotate: [-5, 5, -5] }}
+                  transition={{ duration: 2.2 + i * 0.3, repeat: Infinity, ease: 'easeInOut', delay: i * 0.2 }}
+                  className="cursor-default select-none"
+                  whileHover={{ scale: 1.4 }}
+                >
+                  {emoji}
+                </motion.span>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          {/* ── BOTTOM Wish Row ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 1.0 }}
+            className="absolute bottom-4 inset-x-0 flex justify-center flex-wrap gap-3 px-4 pointer-events-none z-10"
+          >
+            {BOTTOM_WISHES.map((w, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: w.delay, type: 'spring' }}
+                className="px-3 py-1 rounded-full text-xs md:text-sm font-rajdhani font-bold uppercase tracking-widest"
+                style={{
+                  color: w.color,
+                  background: `${w.color}18`,
+                  border: `1px solid ${w.color}55`,
+                  boxShadow: `0 0 10px ${w.color}33`,
+                  textShadow: `0 0 8px ${w.color}`,
+                  backdropFilter: 'blur(6px)',
+                }}
+              >
+                {w.text}
+              </motion.span>
+            ))}
+          </motion.div>
+
+          {/* ── Cake (bottom center, behind text) ── */}
+          <motion.div
+            initial={{ y: '110%', opacity: 0 }}
+            animate={{ y: '0%', opacity: 0.35 }}
+            transition={{ duration: 2, delay: 1.5, type: 'spring', bounce: 0.3 }}
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[8rem] md:text-[12rem] pointer-events-none z-[5] select-none"
+            style={{ filter: 'drop-shadow(0 0 40px rgba(255,215,0,0.3))' }}
+          >
+            🎂
+          </motion.div>
+        </>
+      )}
     </div>
   );
 }

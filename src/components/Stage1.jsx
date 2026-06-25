@@ -20,10 +20,22 @@ export default function Stage1({ onSuccess }) {
         setPin(newPin);
         
         if (newPin.length === MAX_LENGTH) {
-          triggerSuccessAnimation(newPin);
+          if (newPin === '02072005') {
+            triggerSuccessAnimation(newPin);
+          } else {
+            triggerErrorAnimation();
+          }
         }
       }
     }
+  };
+
+  const triggerErrorAnimation = () => {
+    setStatus('error');
+    setTimeout(() => {
+      setPin('');
+      setStatus('idle');
+    }, 600);
   };
 
   const triggerSuccessAnimation = (enteredPin) => {
@@ -94,17 +106,17 @@ export default function Stage1({ onSuccess }) {
         className={`relative z-10 w-full md:w-1/2 flex flex-col items-center justify-center p-8 gap-8 ${status === 'success' ? 'fixed inset-0 !w-full !flex-row z-50 bg-[#992222]' : 'max-w-md'}`}
       >
         <AnimatePresence>
-          {status === 'idle' && (
+          {(status === 'idle' || status === 'error') && (
             <motion.div 
               key="header"
               exit={{ opacity: 0, y: -50 }}
               className="text-center"
             >
               <motion.div className="text-2xl mb-4 text-[#eacbb3]">🔒</motion.div>
-              <h2 className="font-rajdhani text-sm tracking-[0.2em] text-[#eacbb3] font-semibold">
-                ENTER A PASSCODE
+              <h2 className={`font-rajdhani text-sm tracking-[0.2em] font-semibold ${status === 'error' ? 'text-red-400' : 'text-[#eacbb3]'}`}>
+                {status === 'error' ? 'INCORRECT PASSCODE' : 'ENTER A PASSCODE'}
               </h2>
-              <p className="text-xs text-[#eacbb3]/50 mt-1 tracking-widest uppercase font-rajdhani">
+              <p className={`text-xs mt-1 tracking-widest uppercase font-rajdhani ${status === 'error' ? 'text-red-400/70' : 'text-[#eacbb3]/50'}`}>
                 DATE OF BIRTH
               </p>
             </motion.div>
@@ -119,6 +131,7 @@ export default function Stage1({ onSuccess }) {
           {Array.from({ length: MAX_LENGTH }).map((_, i) => {
             const isFilled = i < pin.length;
             const isSuccess = status === 'success';
+            const isError = status === 'error';
             const digit = pin[i];
             
             return (
@@ -126,13 +139,19 @@ export default function Stage1({ onSuccess }) {
                 layout
                 key={i}
                 initial={isSuccess ? {} : { scale: 0.8, opacity: 0 }}
-                animate={isSuccess ? {
-                  scale: [1, 1.2, 1],
-                  y: [0, -20, 0],
-                  boxShadow: '0 0 40px rgba(255,215,0,0.8)',
-                  borderColor: '#FFD700',
-                  background: 'rgba(255,215,0,0.2)'
-                } : { scale: 1, opacity: 1 }}
+                animate={
+                  isSuccess ? {
+                    scale: [1, 1.2, 1],
+                    y: [0, -20, 0],
+                    boxShadow: '0 0 40px rgba(255,215,0,0.8)',
+                    borderColor: '#FFD700',
+                    background: 'rgba(255,215,0,0.2)'
+                  } 
+                  : isError ? {
+                    x: [-10, 10, -10, 10, 0],
+                  }
+                  : { scale: 1, opacity: 1 }
+                }
                 transition={isSuccess ? { 
                   duration: 2, 
                   delay: i * 0.1, 
@@ -145,9 +164,11 @@ export default function Stage1({ onSuccess }) {
                     : 'w-8 h-10 sm:w-10 sm:h-12 rounded-md'}
                   ${isSuccess 
                     ? 'bg-[#ffeedd]/30 border-[#FFD700] border-2 shadow-[0_0_20px_rgba(255,238,221,0.5)]' 
-                    : isFilled 
-                      ? 'bg-[#ffeedd]/20 border-[#ffeedd] border-2 shadow-[0_0_10px_rgba(255,238,221,0.3)]' 
-                      : 'bg-black/10 border-black/20 border'}
+                    : isError
+                      ? 'bg-red-500/20 border-red-500 border-2 shadow-[0_0_10px_rgba(255,0,0,0.5)]'
+                      : isFilled 
+                        ? 'bg-[#ffeedd]/20 border-[#ffeedd] border-2 shadow-[0_0_10px_rgba(255,238,221,0.3)]' 
+                        : 'bg-black/10 border-black/20 border'}
                 `}
               >
                 {isFilled && (
@@ -156,7 +177,7 @@ export default function Stage1({ onSuccess }) {
                     initial={isSuccess ? { rotateX: 90 } : { scale: 0 }}
                     animate={isSuccess ? { rotateX: 0, textShadow: '0 0 20px #FFD700' } : { scale: 1 }}
                     transition={isSuccess ? { delay: i * 0.1 + 0.5, duration: 0.8, type: "spring" } : {}}
-                    className={`font-bold font-orbitron ${isSuccess ? 'text-4xl text-[#FFD700]' : 'text-lg sm:text-xl text-[#ffeedd]'}`}
+                    className={`font-bold font-orbitron ${isSuccess ? 'text-4xl text-[#FFD700]' : isError ? 'text-lg sm:text-xl text-red-500' : 'text-lg sm:text-xl text-[#ffeedd]'}`}
                   >
                     {isSuccess ? digit : '∗'}
                   </motion.div>
@@ -168,7 +189,7 @@ export default function Stage1({ onSuccess }) {
 
         {/* Number Pad - disappears on success */}
         <AnimatePresence>
-          {status === 'idle' && (
+          {(status === 'idle' || status === 'error') && (
             <motion.div 
               key="keypad"
               exit={{ opacity: 0, scale: 0.5, y: 100 }}
