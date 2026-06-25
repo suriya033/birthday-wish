@@ -1,0 +1,430 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600;700&display=swap');
+
+@import "tailwindcss";
+
+:root {
+  --gold: #FFD700;
+  --gold-light: #FFF0A0;
+  --gold-dark: #B8860B;
+  --bg: #050505;
+  --glass: rgba(255, 215, 0, 0.05);
+  --glass-border: rgba(255, 215, 0, 0.2);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  background: #050505;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Rajdhani', sans-serif;
+  color: #fff;
+  cursor: none;
+}
+
+/* Custom Cursor */
+.cursor {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  background: var(--gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, width 0.2s, height 0.2s;
+  box-shadow: 0 0 20px var(--gold), 0 0 40px var(--gold);
+  mix-blend-mode: screen;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255,215,0,0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s ease, width 0.2s, height 0.2s, border-color 0.2s;
+}
+
+/* Glassmorphism */
+.glass-panel {
+  background: rgba(255, 215, 0, 0.03);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+}
+
+.glass-panel-strong {
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 20px;
+}
+
+/* Gold text glow */
+.gold-text {
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(255,215,0,0.8), 0 0 40px rgba(255,215,0,0.4);
+}
+
+.gold-glow {
+  filter: drop-shadow(0 0 20px rgba(255,215,0,0.8));
+}
+
+/* Scan line animation */
+@keyframes scanLine {
+  0% { top: -2px; }
+  100% { top: 100%; }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,215,0,0.8), transparent);
+  animation: scanLine 3s linear infinite;
+  pointer-events: none;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 50%, 90% { transform: translateX(-10px); }
+  30%, 70% { transform: translateX(10px); }
+}
+
+.shake {
+  animation: shake 0.5s ease;
+}
+
+/* Glow pulse */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.3), 0 0 40px rgba(255,215,0,0.1); }
+  50% { box-shadow: 0 0 40px rgba(255,215,0,0.8), 0 0 80px rgba(255,215,0,0.3); }
+}
+
+.glow-pulse {
+  animation: glowPulse 2s ease infinite;
+}
+
+/* Input styling */
+.secure-input {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  outline: none;
+  color: #FFD700;
+  font-family: 'Orbitron', monospace;
+  letter-spacing: 4px;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 14px 20px;
+  width: 100%;
+  text-align: center;
+  font-size: 18px;
+}
+
+.secure-input:focus {
+  border-color: rgba(255, 215, 0, 0.8);
+  box-shadow: 0 0 20px rgba(255,215,0,0.4), inset 0 0 20px rgba(255,215,0,0.05);
+}
+
+.secure-input::placeholder {
+  color: rgba(255,215,0,0.3);
+  letter-spacing: 2px;
+}
+
+/* Button styling */
+.secure-btn {
+  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
+  border: 1px solid rgba(255,215,0,0.5);
+  color: #FFD700;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 14px 40px;
+  border-radius: 8px;
+  cursor: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.secure-btn:hover {
+  background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,215,0,0.1));
+  border-color: rgba(255,215,0,1);
+  box-shadow: 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2);
+  transform: translateY(-2px);
+}
+
+.secure-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255,215,0,0.1), transparent);
+  transform: rotate(45deg);
+  transition: all 0.5s ease;
+  opacity: 0;
+}
+
+.secure-btn:hover::before {
+  opacity: 1;
+  top: -100%;
+  left: -100%;
+}
+
+/* Stars canvas */
+canvas.stars-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Orbitron font */
+.font-orbitron {
+  font-family: 'Orbitron', monospace;
+}
+
+.font-rajdhani {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+/* Security ring animations */
+@keyframes rotateRing {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rotateRingReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+.ring-1 { animation: rotateRing 4s linear infinite; }
+.ring-2 { animation: rotateRingReverse 6s linear infinite; }
+.ring-3 { animation: rotateRing 8s linear infinite; }
+
+/* Progress bar */
+@keyframes progressFill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+/* Red flash */
+@keyframes redFlash {
+  0%, 100% { background: transparent; }
+  50% { background: rgba(255,0,0,0.15); }
+}
+
+.red-flash {
+  animation: redFlash 0.2s ease 3;
+}
+
+/* Letter by letter appear */
+@keyframes letterAppear {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fireworks styles */
+@keyframes fireworkBurst {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.float-anim {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Birthday text glow */
+@keyframes birthdayGlow {
+  0%, 100% { text-shadow: 0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.3), 0 0 100px rgba(255,215,0,0.1); }
+  50% { text-shadow: 0 0 60px rgba(255,215,0,1), 0 0 100px rgba(255,215,0,0.6), 0 0 200px rgba(255,215,0,0.3); }
+}
+
+.birthday-glow {
+  animation: birthdayGlow 2s ease-in-out infinite;
+}
+
+/* Confetti base styles */
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* Scroll bar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,215,0,0.4);
+  border-radius: 3px;
+}
+
+/* Particle trail */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  z-index: 9999;
+  animation: particleFade 0.8s ease forwards;
+}
+
+@keyframes particleFade {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0); }
+}
+
+/* PIN digit */
+.pin-digit {
+  width: 60px;
+  height: 70px;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid rgba(255,215,0,0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 24px;
+  color: #FFD700;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 20px #FFD700;
+}
+
+.pin-digit.active {
+  border-color: rgba(255,215,0,0.8);
+  box-shadow: 0 0 20px rgba(255,215,0,0.5);
+}
+
+/* Typewriter cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typewriter-cursor {
+  animation: blink 1s infinite;
+}
+
+/* Holographic effect */
+@keyframes holographic {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.holographic-text {
+  background: linear-gradient(135deg, #FFD700, #FFF, #FFD700, #FFA500, #FFD700);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: holographic 3s ease infinite;
+}
+
+/* Rotating security ring */
+.security-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,215,0,0.3);
+}
+
+/* Lock icon animation */
+@keyframes lockUnlock {
+  0%, 80% { transform: rotate(0deg); }
+  90% { transform: rotate(-10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* Celebration burst */
+@keyframes celebrationBurst {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: scale(3) rotate(360deg); opacity: 0; }
+}
+
+/* Candle flame */
+@keyframes flicker {
+  0%, 100% { transform: scaleX(1) scaleY(1); opacity: 1; }
+  25% { transform: scaleX(0.9) scaleY(1.1); opacity: 0.9; }
+  50% { transform: scaleX(1.1) scaleY(0.9); opacity: 1; }
+  75% { transform: scaleX(0.95) scaleY(1.05); opacity: 0.95; }
+}
+
+.candle-flame {
+  animation: flicker 0.3s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Gift box shake */
+@keyframes giftShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+/* Aurora effect */
+@keyframes aurora {
+  0% { opacity: 0.3; transform: translateX(-10%) scale(1); }
+  50% { opacity: 0.6; transform: translateX(10%) scale(1.1); }
+  100% { opacity: 0.3; transform: translateX(-10%) scale(1); }
+}
+
+.aurora {
+  animation: aurora 8s ease-in-out infinite;
+}
+
+/* Star twinkle */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .secure-input {
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+  .secure-btn {
+    padding: 12px 24px;
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+  .pin-digit {
+    width: 45px;
+    height: 55px;
+    font-size: 18px;
+  }
+}
