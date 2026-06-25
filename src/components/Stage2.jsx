@@ -83,7 +83,7 @@ export default function Stage2({ onOpen }) {
               className="text-2xl md:text-3xl font-semibold mt-1"
               style={{ fontFamily: "'Caveat', cursive", color: '#9b2335' }}
             >
-              Prakash Sankar
+              Prakash Sankari
             </motion.p>
           </div>
 

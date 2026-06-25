@@ -228,7 +228,7 @@ export default function Stage3() {
             />
 
             <RandomTextReveal
-              text="PRAKASH SANKAR"
+              text="PRAKASH SANKARI"
               className="font-rajdhani font-bold text-4xl md:text-6xl lg:text-7xl mb-6 birthday-glow"
               style={{ color: '#fff', textShadow: '0 0 30px rgba(255,255,255,0.35)' }}
               delayOffset={2.0}
